@@ -1,6 +1,5 @@
 # 爬取PTT鄉民的留言
-> [time=Sun, Jan 5, 2020 11:21 PM]
-> [TOC]
+
 ### 載入模組
 ```python
 import requests, datetime as dt
