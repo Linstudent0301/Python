@@ -3,18 +3,16 @@ from bs4 import BeautifulSoup
 from datetime import datetime
 
 def Respon(url):
-    headers = {
-        "user-agent":
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36"
-    }
-    r = requests.get(url, cookies={'over18': '1'}, headers=headers)
+    headers = {"user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36"}
+    cookies = {'over18': '1'}
+    r = requests.get(url, cookies=cookies, headers=headers)
     soup = BeautifulSoup(r.text, 'lxml')
     return soup
 
 def Post_Date(url, y1, m1, d1, y2, m2, d2, file):
     soup = Respon(url)
     date1 = soup.select("div.article-metaline span.article-meta-value")
-    date2 = datetime.strptime(date1[2].text, "%a %b %d %H:%M:%S %Y")  #發文日期
+    date2 = datetime.strptime(date1[2].text, "%a %b %d %H:%M:%S %Y")  
     if (date2 >= datetime(y1, m1, d1)) and (date2 <= datetime(y2, m2, d2)):
         tag = soup.select('div.push span.f3.push-content')
         for t in tag:
@@ -45,7 +43,7 @@ def PTT(y1, m1, d1, y2, m2, d2, Kanban, search, filename):
                 T2 = False
             if (link == 20 + 1):
                 T2 = False
-        page += 1  #換頁
+        page += 1  
     file.close()
 
 
