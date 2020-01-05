@@ -2,12 +2,14 @@ import requests, datetime as dt
 from bs4 import BeautifulSoup
 from datetime import datetime
 
+
 def Respon(url):
     headers = {"user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36"}
     cookies = {'over18': '1'}
     r = requests.get(url, cookies=cookies, headers=headers)
     soup = BeautifulSoup(r.text, 'lxml')
     return soup
+
 
 def Post_Date(url, y1, m1, d1, y2, m2, d2, file):
     soup = Respon(url)
@@ -25,6 +27,7 @@ def Post_Date(url, y1, m1, d1, y2, m2, d2, file):
     elif date2 < datetime(y1, m1, d1):  
         return "低於"
 
+    
 def PTT(y1, m1, d1, y2, m2, d2, Kanban, search, filename):
     file = open("{}.txt".format(str(filename)), 'w', encoding='UTF-8')
     T1   = True
@@ -45,8 +48,3 @@ def PTT(y1, m1, d1, y2, m2, d2, Kanban, search, filename):
                 T2 = False
         page += 1  
     file.close()
-
-
-
-#PTT(2019, 12, 1, 2020, 2, 1, "gossiping", "跨年", "PTT")
-
