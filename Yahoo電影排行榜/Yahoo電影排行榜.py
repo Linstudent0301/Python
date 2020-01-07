@@ -1,20 +1,20 @@
-import 	requests , tkinter as tk , urllib , os , webbrowser , re
-from 	bs4  		import BeautifulSoup
-from 	tkinter 	import ttk
-from 	tkinter 	import Label
-from 	tkinter 	import LabelFrame
-from 	tkinter 	import Button
-from 	tkinter 	import messagebox
-from 	tkinter 	import Canvas
-from 	PIL 		import Image , ImageTk
+import  requests , tkinter as tk , urllib , os , webbrowser , re
+from  bs4    import BeautifulSoup
+from  tkinter  import ttk
+from  tkinter  import Label
+from  tkinter  import LabelFrame
+from  tkinter  import Button
+from  tkinter  import messagebox
+from  tkinter  import Canvas
+from  PIL   import Image , ImageTk
 
 #==================================================================================
 
 def Request_url(url):
 	try:
 		r = requests.get(url)
-		r.raise_for_status()	#判斷http回應的狀態碼是否為200
-		r.encoding = 'utf-8'	#改變編碼方式避免出現亂碼
+		r.raise_for_status() #判斷http回應的狀態碼是否為200
+		r.encoding = 'utf-8' #改變編碼方式避免出現亂碼
 		soup = BeautifulSoup(r.text, 'lxml')
 	except:
 		pass
@@ -25,22 +25,22 @@ def Show_Movie_Img(url):
 
 	soup = Request_url(url)
 	img_url    = soup.find('div', class_= 'movie_intro_foto').img.get('src')#圖片網址
-	movie_name = soup.find('h1').get_text()			#電影名稱
-	img_name  = movie_name + '.png'					#圖片名稱
+	movie_name = soup.find('h1').get_text()   #電影名稱
+	img_name  = movie_name + '.png'     #圖片名稱
 	file_path = "img"
-	img_path  = file_path  + '/' + img_name			#圖片的路徑
+	img_path  = file_path  + '/' + img_name   #圖片的路徑
 
-	if not os.path.exists(file_path): 	#資料夾不存在就建立
+	if not os.path.exists(file_path):  #資料夾不存在就建立
 		os.mkdir(file_path)
 
-	if not os.path.exists(img_path):  	#圖片  不存在就建立
+	if not os.path.exists(img_path):   #圖片  不存在就建立
 		urllib.request.urlretrieve(img_url , img_path)
 
 	try:
-		img = Image.open(img_path)		#打開圖片
-		img.thumbnail((250,300))	 	#改變大小
-		img.save(img_path)			 	#儲存圖片
-		photo = ImageTk.PhotoImage(img)	#讀取圖片
+		img = Image.open(img_path)  #打開圖片
+		img.thumbnail((250,300))   #改變大小
+		img.save(img_path)     #儲存圖片
+		photo = ImageTk.PhotoImage(img) #讀取圖片
 		CV.create_image(0 , 0 , anchor = 'nw', image = photo )#放置圖片
 	except(OSError):
 		messagebox.showerror(title = 'OS Error' , message = '儲存格式錯誤')
@@ -53,33 +53,33 @@ def Show_Movie_Text(url):
 	detail = []
 	soup = Request_url(url)
 
-	movie_name 	= soup.find('h1').get_text()	#得到電影名稱
-	detail.append('片　　名：' + movie_name)   	#添加電影名稱
+	movie_name  = soup.find('h1').get_text() #得到電影名稱
+	detail.append('片　　名：' + movie_name)    #添加電影名稱
 
 	detail_tag  = soup.find('div' , class_ = 'movie_intro_info_r').find_all('span')
 	for d in detail_tag:
 		detail.append(d.get_text())
 
-	director 	= soup.select('div.movie_intro_list')[0].get_text() #導演
-	actor		= soup.select('div.movie_intro_list')[1].get_text()	#演員
-	director 	= re.sub("[' ','\n']" , '' , director) #將空白.換行符號刪除
-	actor		= re.sub("[' ','\n']" , '' , actor)
-	d1 = detail.index('導演：')		#紀錄位置
+	director  = soup.select('div.movie_intro_list')[0].get_text() #導演
+	actor  = soup.select('div.movie_intro_list')[1].get_text() #演員
+	director  = re.sub("[' ','\n']" , '' , director) #將空白.換行符號刪除
+	actor  = re.sub("[' ','\n']" , '' , actor)
+	d1 = detail.index('導演：')  #紀錄位置
 	a1 = detail.index('演員：')
-	detail.remove('導演：')			#刪除
+	detail.remove('導演：')   #刪除
 	detail.remove('演員：')
-	d2 = '導　　演：' + director	   	#合併
+	d2 = '導　　演：' + director     #合併
 	a2 = '演　　員：\n' + actor
-	detail.insert(d1,d2)	  		#重新插入
+	detail.insert(d1,d2)     #重新插入
 	detail.insert(a1,a2)
 
-	if '官方連結：' in detail:		#有就刪除
+	if '官方連結：' in detail:  #有就刪除
 		detail.remove('官方連結：')
 
 
 	#--------------------------------
 
-	if len(detail) == 6 :				#無IMDb分數
+	if len(detail) == 6 :    #無IMDb分數
 		t1.config(text = detail[0])
 		t2.config(text = detail[1])
 		t3.config(text = detail[2])
@@ -88,7 +88,7 @@ def Show_Movie_Text(url):
 		t6.config(text = detail[4])
 		t7.config(text = detail[5])
 
-	elif len(detail) == 7 :				#有IMDb分數
+	elif len(detail) == 7 :    #有IMDb分數
 		for i in range(len(detail)):
 			globals()['t' + str(i+1)].config(text = detail[i])
 
@@ -111,7 +111,7 @@ def Show_Movie_Data(event):
 		intr_link_but.config(command = lambda:  webbrowser.open(option_movie) , state = 'normal')
 
 		Show_Movie_Text(option_movie) #顯示電影資料
-		Show_Movie_Img(option_movie)	#顯示電影圖片
+		Show_Movie_Img(option_movie) #顯示電影圖片
 
 	elif option_movie == '': #沒有連結就跳出錯誤
 		intr_link_but.config(state = 'disabled')
@@ -143,14 +143,19 @@ def Taipei(url):
 	soup = Request_url(url)
 
 	column_tag  = soup.select( 'div.rank_list.table.rankstyle1 div[class="tr top"]' )
-	row_tag     = soup.select( 'div.rank_list.table.rankstyle1 div[class="tr"]' )   	#class(屬性)tr(值)
+	row_tag     = soup.select( 'div.rank_list.table.rankstyle1 div[class="tr"]' )    #class(屬性)tr(值)
 	column_name =  list(column_tag.pop(0).stripped_strings)
 
 	time_label_tag = soup.find('div' , class_ = 'rank_time').get_text()
 	time_label.config(text = time_label_tag)
 
 	ERL  = []
-	TRL  = []
+	TRL = []
+	
+	MIL = soup.select("div.rank_list.table.rankstyle1 div.tr div[class = 'td'] a")
+	MIU = [ ]
+	for m in range( len(MIL) ):
+		MIU.append(MIL[m].get("href"))
 
 	for rt in range(len(row_tag)):
 
@@ -158,22 +163,19 @@ def Taipei(url):
 
 		if not ERL[1].isdigit():
 			ERL.insert(1, str('') )
+		if rt == 0:
+			del ERL[3]
+			del ERL[3]
 
-		if rt == 0 :
-			del ERL[3:5] #刪除第3個跟第4個元素(英文名稱跟簡單的電影介紹)
+		if ERL[3] == "未定" and len(ERL) == 4:
+			ERL.append("")
+			MIU.insert(rt, "")
 
 		if ERL[4] != '預告片':
-			ERL.insert(4, str('無') )
+			ERL.insert(4, str('無'))
 
-		TRL.append( ERL )
+		TRL.append(ERL)
 
-	#------------------------------
-
-	MIL = soup.select( "div.rank_list.table.rankstyle1 div.tr div[class = 'td'] a" )
-	MIU = [ ]
-	for m in range( len(MIL) ):
-		MIU.append( MIL[m].get("href") )
-	#------------------------------
 
 	tree = ttk.Treeview(frame_rank, columns = column_name , height = 10 , show = "headings") #第一列(垂直)不顯示
 	ttk.Style().configure('Treeview', rowheight = 26)
@@ -181,14 +183,15 @@ def Taipei(url):
 	for cn  in range(len(column_name)):
 		tree.heading(cn , text = column_name[cn] )
 	for row in range(len(TRL)):
-		tree.insert('' , 'end' , values = TRL[row] , text = MIU[row])
+		tree.insert('', 'end', values=TRL[row], text=MIU[row])
+
 
 	tree.column('0' , width = 35  , minwidth = 35  , anchor = 'center' )#本週
 	tree.column('1' , width = 35  , minwidth = 35  , anchor = 'center' )#上週
 	tree.column('2' , width = 260 , minwidth = 260 , anchor = 'center' )#片名
-	tree.column('3' , width = 90 , minwidth = 90 , anchor = 'center' )	#上映日期
-	tree.column('4' , width = 60 , minwidth = 60 , anchor = 'center' )	#預告片
-	tree.column('5' , width = 70 , minwidth = 70 , anchor = 'center' )	#網友滿意度
+	tree.column('3' , width = 90 , minwidth = 90 , anchor = 'center' ) #上映日期
+	tree.column('4' , width = 60 , minwidth = 60 , anchor = 'center' ) #預告片
+	tree.column('5' , width = 70 , minwidth = 70 , anchor = 'center' ) #網友滿意度
 	tree.pack(padx = 10 ,pady = 10 )
 
 	tree.bind("<<TreeviewSelect>>" , Show_Movie_Data)
@@ -219,17 +222,17 @@ def USA(url):
 	TRL  = []
 
 	count = -1
-	record_row = 0		#沒有連結
+	record_row = 0  #沒有連結
 
 	for rt in range(len(row_tag)):
 		count +=1
 		ERL = list(row_tag.pop(0).stripped_strings) #列表中的第一個元素開始移除
 
-		if not ERL[1].isdigit():		#如果上週無排名就添加空元素
+		if not ERL[1].isdigit():  #如果上週無排名就添加空元素
 			ERL.insert(1, str('') )
 
-		if rt == 0:  		#本週排名為1
-		   del ERL[3:5] 	#刪除第3個跟第4個元素(英文名稱跟電影介紹)
+		if rt == 0:    #本週排名為1
+			del ERL[3:5]  #刪除第3個跟第4個元素(英文名稱跟電影介紹)
 
 		if len(ERL) == 6:
 			if ERL[4] != '預告片':
@@ -245,7 +248,7 @@ def USA(url):
 
 	#------------------------------
 
-	column_tag  = soup.select( 'div.rank_list.table.rankstyle1 div[class="tr top"]' ) 	#
+	column_tag  = soup.select( 'div.rank_list.table.rankstyle1 div[class="tr top"]' )  #
 	column_name =  list(column_tag.pop().stripped_strings)
 
 	#------------------------------
@@ -261,9 +264,9 @@ def USA(url):
 	tree.column('0' , width = 35 , minwidth = 35 , anchor = 'center' )#本週
 	tree.column('1' , width = 35 , minwidth = 35 , anchor = 'center' )#上週
 	tree.column('2' , width = 260 , minwidth = 260 , anchor = 'center')#片名
-	tree.column('3' , width = 90 , minwidth = 90 , anchor = 'center' )	#上映日期
-	tree.column('4' , width = 60 , minwidth = 60 , anchor = 'center' )	#預告片
-	tree.column('5' , width = 70 , minwidth = 70 , anchor = 'center' )	#網友滿意度
+	tree.column('3' , width = 90 , minwidth = 90 , anchor = 'center' ) #上映日期
+	tree.column('4' , width = 60 , minwidth = 60 , anchor = 'center' ) #預告片
+	tree.column('5' , width = 70 , minwidth = 70 , anchor = 'center' ) #網友滿意度
 
 	tree.pack(padx = 10 , pady = 10 )
 	tree.bind("<<TreeviewSelect>>" , Show_Movie_Data)
@@ -341,6 +344,11 @@ def Year(url):
 	time_label_tag = soup.find('div' ,class_ = 'rank_time').get_text()
 	time_label.config(text = time_label_tag)
 
+	MIL = soup.select('div.rank_list.table.rankstyle1 div.tr div[class = "td"] a')
+	MIU = []
+	for m in range(len(MIL)):
+		MIU.append(MIL[m].get("href"))
+
 	ERL  = []
 	TRL  = []
 
@@ -349,10 +357,13 @@ def Year(url):
 		ERL = list(row_tag.pop(0).stripped_strings)
 
 		if rt == 0:
-		   del ERL[3:5]
+			del ERL[3:5]
 
 		if not ERL[1].isdigit():
 			ERL.insert(1, str('') )
+		if ERL[3] == "未定" and len(ERL) == 4:
+			ERL.append("")
+			MIU.insert(rt, "")
 
 		if ERL[4] != '預告片':
 			ERL.insert(4, str('無') )
@@ -366,11 +377,8 @@ def Year(url):
 
 	#------------------------------
 
-	MIL = soup.select( 'div.rank_list.table.rankstyle1 div.tr div[class = "td"] a' )
-	MIU = []
-	for m in range( len(MIL) ):
-		MIU.append( MIL[m].get("href") )
 
+	
 	#------------------------------
 
 	tree = ttk.Treeview(frame_rank, columns = column_name , height = 10 , show = "headings")
@@ -384,9 +392,9 @@ def Year(url):
 	tree.column('0' , width = 35  , minwidth = 35  , anchor = 'center' )#本週
 	tree.column('1' , width = 35  , minwidth = 35  , anchor = 'center' )#上週
 	tree.column('2' , width = 260 , minwidth = 260 , anchor = 'center' )#片名
-	tree.column('3' , width = 90 , minwidth = 90 , anchor = 'center' )	#上映日期
-	tree.column('4' , width = 60 , minwidth = 60 , anchor = 'center' )	#預告片
-	tree.column('5' , width = 70 , minwidth = 70 , anchor = 'center' )	#網友滿意度
+	tree.column('3' , width = 90 , minwidth = 90 , anchor = 'center' ) #上映日期
+	tree.column('4' , width = 60 , minwidth = 60 , anchor = 'center' ) #預告片
+	tree.column('5' , width = 70 , minwidth = 70 , anchor = 'center' ) #網友滿意度
 
 	tree.pack(padx = 10 , pady = 10 )
 	tree.bind("<<TreeviewSelect>>" , Show_Movie_Data)
@@ -439,11 +447,11 @@ def Trailer(url):
 	for row in range(len(TRL)):
 		tree.insert('' , 'end' , values = TRL[row] , text = MIU[row])
 
-	tree.column('0' , width = 35  , minwidth = 35  , anchor = 'center' )	#排名
-	tree.column('1' , width = 295 , minwidth = 295 , anchor = 'center' )	#片名
-	tree.column('2' , width = 90 , minwidth = 90 , anchor = 'center' )		#上映日期
-	tree.column('3' , width = 60 , minwidth = 60 , anchor = 'center' )		#預告片
-	tree.column('4' , width = 70 , minwidth = 70 , anchor = 'center' )		#網友滿意度
+	tree.column('0' , width = 35  , minwidth = 35  , anchor = 'center' ) #排名
+	tree.column('1' , width = 295 , minwidth = 295 , anchor = 'center' ) #片名
+	tree.column('2' , width = 90 , minwidth = 90 , anchor = 'center' )  #上映日期
+	tree.column('3' , width = 60 , minwidth = 60 , anchor = 'center' )  #預告片
+	tree.column('4' , width = 70 , minwidth = 70 , anchor = 'center' )  #網友滿意度
 
 	tree.pack(padx = 10 ,pady = 10)
 	tree.bind("<<TreeviewSelect>>" , Show_Movie_Data)
@@ -476,7 +484,7 @@ def Expects(url):
 
 			join = ''.join(ERL[5]) #提取第6個元素 合併到join這個字串
 
-			str1 = ''					#投票人數
+			str1 = ''     #投票人數
 
 			for st in join:
 				if st.isdigit():
@@ -491,8 +499,8 @@ def Expects(url):
 
 		column_tag  = soup.select( 'div.rank_list.table.rankstyle3 div[class="tr top"]' )
 		column_name = list(column_tag.pop(0).stripped_strings)
-		del column_name[len(column_name)-1]  		#把期待度刪掉
-		column_name.extend(['想看人數','投票人數'])  	#在最後面插入多個元素
+		del column_name[len(column_name)-1]    #把期待度刪掉
+		column_name.extend(['想看人數','投票人數'])   #在最後面插入多個元素
 
 		#------------------------------
 
@@ -511,12 +519,12 @@ def Expects(url):
 		for row in range(len(TRL)):
 			tree.insert('' , 'end', values = TRL[row] ,text =  MIU[row] )
 
-		tree.column('0' , width = 35  , minwidth = 35  , anchor = 'center' )	#排名
-		tree.column('1' , width = 255 , minwidth = 255 , anchor = 'center' )	#片名
-		tree.column('2' , width = 80 , minwidth = 80  , anchor = 'center' )		#上映日期
-		tree.column('3' , width = 60 , minwidth = 60 , anchor = 'center' )		#預告片
-		tree.column('4' , width = 60 , minwidth = 60 , anchor = 'center' )		#想看人數
-		tree.column('5' , width = 60 , minwidth = 60 , anchor = 'center' )		#投票人數
+		tree.column('0' , width = 35  , minwidth = 35  , anchor = 'center' ) #排名
+		tree.column('1' , width = 255 , minwidth = 255 , anchor = 'center' ) #片名
+		tree.column('2' , width = 80 , minwidth = 80  , anchor = 'center' )  #上映日期
+		tree.column('3' , width = 60 , minwidth = 60 , anchor = 'center' )  #預告片
+		tree.column('4' , width = 60 , minwidth = 60 , anchor = 'center' )  #想看人數
+		tree.column('5' , width = 60 , minwidth = 60 , anchor = 'center' )  #投票人數
 
 		tree.pack(padx = 10 ,pady = 10)
 		tree.bind("<<TreeviewSelect>>" , Show_Movie_Data)
@@ -532,19 +540,19 @@ def Expects(url):
 			now = 30
 		else:
 			now = 365
-		if now != record:		#避免發生重複選取
+		if now != record:  #避免發生重複選取
 			url = 'https://movies.yahoo.com.tw/chart.html?cate=exp_30&search_date=' + str(now)
 			tree.destroy()
 			SHOW_Tree(url)
 			rank_link_but.config(command = lambda: webbrowser.open(url) , state = 'normal')
 			intr_link_but.config(state = 'disabled')
-			record 	= now
+			record  = now
 			CV.delete("all")
 			for i in range(7):
 				globals()['t' + str(i+1)].config(text = '')
 	#=======================
 	global record
-	record = 30  	#上次所選(預設是30)
+	record = 30   #上次所選(預設是30)
 
 	SHOW_Tree(url)
 
@@ -588,7 +596,7 @@ def Feel(url):
 			if ERL[3] != '預告片':
 				ERL.insert(3,'無')
 
-			str1 = ''		#投票人數
+			str1 = ''  #投票人數
 
 			for st in ERL[5]:
 				if st.isdigit():
@@ -617,16 +625,16 @@ def Feel(url):
 		ttk.Style().configure('Treeview', rowheight = 26)
 
 		for cn in range(len(column_name)):
-				tree.heading(cn , text = column_name[cn])
+			tree.heading(cn , text = column_name[cn])
 		for row in range(len(TRL)):
-				tree.insert('' , 'end' , values = TRL[row] , text = MIU[row])
+			tree.insert('' , 'end' , values = TRL[row] , text = MIU[row])
 
 		tree.column('0' , width = 35  , minwidth = 35  , anchor = 'center' )#排名
 		tree.column('1' , width = 245 , minwidth = 245 , anchor = 'center' )#片名
-		tree.column('2' , width = 80 , minwidth = 80 , anchor = 'center' )	#上映日期
-		tree.column('3' , width = 60 , minwidth = 60 , anchor = 'center' )	#預告片
-		tree.column('4' , width = 70 , minwidth = 70 , anchor = 'center' )	#網友滿意度
-		tree.column('5' , width = 60 , minwidth = 60 , anchor = 'center' )	#投票人數
+		tree.column('2' , width = 80 , minwidth = 80 , anchor = 'center' ) #上映日期
+		tree.column('3' , width = 60 , minwidth = 60 , anchor = 'center' ) #預告片
+		tree.column('4' , width = 70 , minwidth = 70 , anchor = 'center' ) #網友滿意度
+		tree.column('5' , width = 60 , minwidth = 60 , anchor = 'center' ) #投票人數
 
 		tree.pack(padx = 10 ,pady = 10)
 		tree.bind("<<TreeviewSelect>>" , Show_Movie_Data)
@@ -641,7 +649,7 @@ def Feel(url):
 		for i in Item:  #對字串當中的每個字元做判斷如果是數字就加到sr裡
 			if i.isdigit():
 				now += i
-		now = int(now)		#轉換成整數
+		now = int(now)  #轉換成整數
 		if now != record:
 			tree.destroy()
 			CV.delete("all")
@@ -652,11 +660,11 @@ def Feel(url):
 			SHOW_Tree(url)
 			rank_link_but.config(command = lambda: webbrowser.open(url) , state = 'normal')
 			intr_link_but.config(state = 'disabled')
-			record 	= now
+			record  = now
 	#=======================
 
 	global record
-	record = 30  	#上次所選(預設是30)
+	record = 30   #上次所選(預設是30)
 
 	SHOW_Tree(url)
 
@@ -679,6 +687,7 @@ def Feel(url):
 
 #==================================================
 def v1(url):
+	
 	Taipei(url)
 	B1.config(state= 'disabled' )
 	for i in [2,3,4,5,6,7]:
@@ -720,7 +729,7 @@ def v7(url):
 	for i in [1,2,3,4,5,6]:
 		globals()['B' + str(i)].config(state = 'normal')
 #=================================================================================================
-											#使用者介面
+#使用者介面
 
 #======================
 #  		  框架
@@ -781,7 +790,7 @@ B7.config(command = lambda: v7(but_link[6]))
 #  		  電影圖片
 #======================
 
-CV = Canvas(frame_img , height = 300 , width = 210  )	#建立畫布
+CV = Canvas(frame_img , height = 300 , width = 210  ) #建立畫布
 CV.pack( padx = 5 , pady = 5 )
 
 #======================
@@ -791,12 +800,12 @@ CV.pack( padx = 5 , pady = 5 )
 loca_y1 = 5  #初始位置
 loca_y2 = 5
 
-for left in range(1,6):		#1-5  片名,上映日期,片長,發行公司,IMDb分數
+for left in range(1,6):  #1-5  片名,上映日期,片長,發行公司,IMDb分數
 	globals()['t' + str(left)] = Label( frame_text , fg = 'black' , font = ('微軟正黑體', 10) )
 	globals()['t' + str(left)].place(x = 30 , y = loca_y1)
 	loca_y1 += 40 #間距
 
-for right in range(6,8):	#6-7  導演,演員
+for right in range(6,8): #6-7  導演,演員
 	globals()['t' + str(right)] = Label( frame_text , fg = 'black' , font = ('微軟正黑體', 10) , wraplength = 380 , justify = 'left' )
 	globals()['t' + str(right)].place(x = 410 , y = loca_y2)
 	loca_y2 += 40
