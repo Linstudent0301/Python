@@ -20,6 +20,7 @@ df = df.drop(del_index)
 ```
 ### 每小時(24)的事故量
 ![](https://i.imgur.com/g13ldbl.png)
+
 上班，下班的時間（7-8點，16-17點）事故量最多
 
 ```python
