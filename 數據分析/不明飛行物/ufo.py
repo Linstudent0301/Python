@@ -59,7 +59,7 @@ for i in range(len(abbr)):
     for j in range(len(State1)):
         if abbr.index[i] == State1[j][0]:  #篩選出美國50州
             State3.append([State1[j][0], State1[j][1]])  #柱狀圖
-            State1[j][0] = abbr.values[i].replace(" \u3000", "")
+            State1[j][0] = abbr.values[i].replace(" /u3000", "")
             State2.append(State1[j])
 State2 = dict(State2)
 
@@ -69,6 +69,7 @@ df["Year"] = df["Date / Time"].dt.year
 Year = df["Year"].value_counts().sort_index()
 plt.plot(Year.index, Year.values)
 plt.title("Year")
+print(df["Year"].value_counts())
 
 # ============================================
 
@@ -144,5 +145,3 @@ for i, seg in enumerate(m.state):
 cax = fig.add_axes([0.9, 0.1, 0.02, 0.8])  #左,下,寬度,高度
 ColorbarBase(ax=cax, cmap=plt.cm.hot_r, norm=Normalize(vmin=0, vmax=10000))
 fig.suptitle('State',  fontsize = 18, x = 0.45)
-
-
