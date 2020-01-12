@@ -14,7 +14,7 @@ from matplotlib.colorbar    import ColorbarBase
 from wordcloud import WordCloud
 
 
-===========================================
+# ===========================================
 
 def use_proxy(proxy_addr, url):
     proxy = urllib.request.ProxyHandler({'https': proxy_addr})
@@ -39,7 +39,7 @@ for t in tag:
             df = pd.concat([df,table])
             df.to_excel("UFO.xlsx", index=False)
 
-============================================
+# ============================================
 
 df = pd.read_excel("UFO.xlsx").drop("Posted", axis=1)
 df["Date / Time"] = pd.to_datetime(df["Date / Time"])
@@ -63,14 +63,14 @@ for i in range(len(abbr)):
             State2.append(State1[j])
 State2 = dict(State2)
 
-============================================
+# ============================================
 
 df["Year"] = df["Date / Time"].dt.year
 Year = df["Year"].value_counts().sort_index()
 plt.plot(Year.index, Year.values)
 plt.title("Year")
 
-============================================
+# ============================================
 
 df["Month"] = df["Date / Time"].dt.month
 Month = df["Month"].value_counts().sort_index()
@@ -79,7 +79,7 @@ plt.bar(Month.index, Month.values)
 plt.xticks(Month.index, fontsize = 9)
 plt.title("Month")
 
-============================================
+# ============================================
 
 df["Hour"] = df["Date / Time"].dt.hour
 Hour = df["Hour"].value_counts().sort_index()
@@ -88,19 +88,19 @@ plt.bar(Hour.index, Hour.values)
 plt.xticks(Hour.index, fontsize = 9)
 plt.title("Hour")
 
-============================================
+# ============================================
 
 State3 = pd.Series(dict(State3)).sort_values()[-10:]
 plt.barh(State3.index, State3.values)
 plt.title("State")
 
-============================================
+# ============================================
 
 shape = df["Shape"].value_counts(ascending = True)[-10:]
 plt.barh(shape.index, shape.values)
 plt.title("Shape")
 
-============================================
+# ============================================
 
 s = ""
 for i in range(len(df)):
@@ -112,7 +112,7 @@ wordcolud = WordCloud(collocations=False,
 plt.imshow(wordcolud, interpolation='bilinear')
 plt.axis("off")
 
-============================================
+# ============================================
 
 fig, axs = plt.subplots(figsize=(8, 5))
 m = Basemap(llcrnrlon=-119,
