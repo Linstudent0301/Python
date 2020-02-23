@@ -1,18 +1,178 @@
-# UFO
-**[nuforc.org](http://www.nuforc.org/webreports/ndxevent.html)**
+# 美國飛碟目擊事件(1940-2019年)
+#### 資料來源：**[nuforc.org](http://www.nuforc.org/webreports/ndxevent.html)**
 ![](https://i.imgur.com/in3MNCU.png)
-#### 飛碟出現的高峰期在暑假(6-8月)跟晚上(18-24點)
-![](https://i.imgur.com/x5pZb7G.png)
-#### 從2006年開始飛碟出現的次數開始呈現爆炸性的成長，1940-2019年飛碟出現次數最多的時候是在2014年(8707)
+#### 飛碟最容易在暑假(6-8月)、晚上(18:00-24:00)的時候出現
 ---
+
+![](https://i.imgur.com/x5pZb7G.png)
+#### 飛碟目擊的次數從2006年開始呈現爆炸性成長
+#### 2014年有將近9000筆的目擊次數(max)
+
+---
+
 ![](https://i.imgur.com/eb5O4k7.png)
 #### 飛碟形狀的前三名分別是碟形、圓盤型、三角形
+
 ---
+
 ![](https://i.imgur.com/A9pbdWV.png)
 ![](https://i.imgur.com/78hv4e2.png)
-#### 飛碟最容易在CA(加州)出現共有9471次，飛碟可能是從太平洋來的，而且CA(加州)的右邊就是NV(內華達州)也是51區的所在地。
+#### 飛碟目擊事件最多的地點在CA(加州)足足有9000多筆，而且51區所在地就在加州的右邊，由此推測飛碟可能是從太平洋而來然後飛越加州在到51區。
+
 ---
+
 ![](https://i.imgur.com/Dt1F2Mf.png)
 
-..
+---
+
+```
+import requests
+import urllib.request
+import numpy as np
+import pandas as pd
+import datetime as dt
+import matplotlib.pyplot as plt
+from bs4                    import BeautifulSoup
+from urllib.request         import urlopen
+from datetime               import datetime, date
+from mpl_toolkits.basemap   import Basemap
+from matplotlib.colors      import rgb2hex, Normalize
+from matplotlib.patches     import Polygon
+from matplotlib.colorbar    import ColorbarBase
+from wordcloud import WordCloud
+
+
+# ===========================================
+
+def use_proxy(proxy_addr, url):
+    proxy = urllib.request.ProxyHandler({'https': proxy_addr})
+    opener = urllib.request.build_opener(proxy, urllib.request.HTTPHandler)
+    urllib.request.install_opener(opener)
+    r = urllib.request.urlopen(url).read()
+    return r
+
+r = use_proxy('194.167.44.91:80',"http://www.nuforc.org/webreports/ndxevent.html")
+soup = BeautifulSoup(r, "html5lib")
+
+df = pd.DataFrame()
+tag = soup.select("font a")
+url = "http://www.nuforc.org/webreports/"
+for t in tag:
+    if t == tag[len(tag)-1]:
+        pass
+    else:
+        date = datetime.strptime(t.text[3:] + t.text[:2], "%Y%m")
+        if date >= datetime(1940, 1, 1) :
+            table = pd.read_html(url + t.get('href'))[0]
+            df = pd.concat([df,table])
+            df.to_excel("UFO.xlsx", index=False)
+
+# ============================================
+
+df = pd.read_excel("UFO.xlsx").drop("Posted", axis=1)
+df["Date / Time"] = pd.to_datetime(df["Date / Time"])
+for i in range(len(df)):
+    over = df["Date / Time"][i]
+    if over > datetime(2040, 1, 1):
+        df["Date / Time"][i] = over.replace(year=over.year - 100)
+
+State1 = df["State"].value_counts()
+State1 = [[State1.index[i], State1.values[i]] for i in range(len(State1))]
+State2 = []
+State3 = []
+abbr = pd.read_excel("US-50.xlsx")
+abbr = pd.Series(abbr["Name"].values, index=abbr["Abbreviation"])
+
+for i in range(len(abbr)):
+    for j in range(len(State1)):
+        if abbr.index[i] == State1[j][0]:  #篩選出美國50州
+            State3.append([State1[j][0], State1[j][1]])  #柱狀圖
+            State1[j][0] = abbr.values[i].replace(" /u3000", "")
+            State2.append(State1[j])
+State2 = dict(State2)
+
+# ============================================
+
+df["Year"] = df["Date / Time"].dt.year
+Year = df["Year"].value_counts().sort_index()
+plt.plot(Year.index, Year.values)
+plt.title("Year")
+print(df["Year"].value_counts())
+
+# ============================================
+
+df["Month"] = df["Date / Time"].dt.month
+Month = df["Month"].value_counts().sort_index()
+plt.subplot(1,2,1)
+plt.bar(Month.index, Month.values)
+plt.xticks(Month.index, fontsize = 9)
+plt.title("Month")
+
+# ============================================
+
+df["Hour"] = df["Date / Time"].dt.hour
+Hour = df["Hour"].value_counts().sort_index()
+plt.subplot(1, 2, 2)
+plt.bar(Hour.index, Hour.values)
+plt.xticks(Hour.index, fontsize = 9)
+plt.title("Hour")
+
+# ============================================
+
+State3 = pd.Series(dict(State3)).sort_values()[-10:]
+plt.barh(State3.index, State3.values)
+plt.title("State")
+
+# ============================================
+
+shape = df["Shape"].value_counts(ascending = True)[-10:]
+plt.barh(shape.index, shape.values)
+plt.title("Shape")
+
+# ============================================
+
+s = ""
+for i in range(len(df)):
+    s += str(df['Summary'][i])
+wordcolud = WordCloud(collocations=False,
+                      width=1000,
+                      height=800,
+                      background_color="white").generate(s)
+plt.imshow(wordcolud, interpolation='bilinear')
+plt.axis("off")
+
+# ============================================
+
+fig, axs = plt.subplots(figsize=(8, 5))
+m = Basemap(llcrnrlon=-119,
+            llcrnrlat=20,
+            urcrnrlon=-64,
+            urcrnrlat=49,
+            projection='lcc',
+            lat_1=33,
+            lat_2=45,
+            lon_0=-95)
+
+m.readshapefile('st99_d00','state',color='gray')
+
+colors = {}
+statenames = []
+for infodict in m.state_info:
+    name = infodict['NAME']
+    statenames.append(name)
+    if name not in ['District of Columbia', 'Puerto Rico']:
+        qua = State2[name]  #ufo的出現的次數
+        colors[name] = plt.cm.hot_r((qua) / (10000))[:3]  #紅綠藍的比例
+
+for i, seg in enumerate(m.state):
+    if statenames[i] not in ['District of Columbia', 'Puerto Rico']:
+        color = rgb2hex(colors[statenames[i]])  #顏色的比例轉色碼表
+        poly = Polygon(seg, facecolor=color, edgecolor=color)  #填滿多邊形顏色
+        axs.add_patch(poly)
+
+cax = fig.add_axes([0.9, 0.1, 0.02, 0.8])  #左,下,寬度,高度
+ColorbarBase(ax=cax, cmap=plt.cm.hot_r, norm=Normalize(vmin=0, vmax=10000))
+fig.suptitle('State',  fontsize = 18, x = 0.45)
+
+```
 
